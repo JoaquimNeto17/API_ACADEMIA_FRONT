@@ -2,7 +2,7 @@
 let cpfRaw = "";
 const displayInput = document.getElementById('display');
 const msgParagraph = document.getElementById('msg');
-const API_URL = 'https://api-academia-five.vercel.app'; 
+const API_URL = 'https://api-academia-mu.vercel.app/'; 
 
 const buttonsNumber = document.querySelectorAll('.n');
 const btnClear = document.getElementById('btnLimpar');
@@ -88,10 +88,58 @@ async function validarCPF() {
         });
 
         const data = await response.json();
-        console.log("RESPOSTA DA API:", data);
+        console.log("RESPOSTA COMPLETA DA API:", data);
+        console.log("STATUS DA RESPOSTA:", response.status);
+
+        // VERIFICA SE É CPF NÃO CADASTRADO
+        // Caso 1: Status 404
+        if (response.status === 404) {
+            msgParagraph.innerText = "❌ CPF NÃO CADASTRADO";
+            msgParagraph.className = "erro";
+            
+            if (window.navigator?.vibrate) window.navigator.vibrate([80, 40, 80]);
+            
+            setTimeout(() => {
+                limparTudo();
+            }, 2500);
+            return;
+        }
+        
+        // Caso 2: Verifica mensagem de erro da API
+        if (data.error) {
+            const erroLower = data.error.toLowerCase();
+            
+            if (erroLower.includes("não encontrado") || 
+                erroLower.includes("not found") ||
+                erroLower.includes("inexistente") ||
+                erroLower.includes("não cadastrado")) {
+                
+                msgParagraph.innerText = "❌ CPF NÃO CADASTRADO";
+                msgParagraph.className = "erro";
+                
+                if (window.navigator?.vibrate) window.navigator.vibrate([80, 40, 80]);
+                
+                setTimeout(() => {
+                    limparTudo();
+                }, 2500);
+                return;
+            } else {
+                // Outro tipo de erro
+                msgParagraph.innerText = data.error;
+                msgParagraph.className = "erro";
+                
+                if (window.navigator?.vibrate) window.navigator.vibrate([80, 40, 80]);
+                
+                setTimeout(() => {
+                    limparTudo();
+                }, 2500);
+                return;
+            }
+        }
 
         const status = (data.status || "").toString().toUpperCase();
 
+        // Caso 3: CPF ATIVO
         if (response.ok && status === "ATIVO") {
             msgParagraph.innerText = "✅ ACESSO LIBERADO";
             msgParagraph.className = "sucesso";
@@ -108,17 +156,27 @@ async function validarCPF() {
                     msgParagraph.className = "";
                 }, 2000);
             }, 2800);
-
-        } else {
-            // Mostra erro vindo da API se existir
-            msgParagraph.innerText = data.error || "⛔ ACESSO NEGADO";
+        } 
+        // Caso 4: CPF INATIVO
+        else if (status === "INATIVO") {
+            msgParagraph.innerText = "⛔ CPF INATIVO - PROCURE A ADMINISTRAÇÃO";
+            msgParagraph.className = "erro";
+            
+            if (window.navigator?.vibrate) window.navigator.vibrate([80, 40, 80]);
+            
+            setTimeout(() => {
+                limparTudo();
+            }, 2500);
+        }
+        // Caso 5: Qualquer outra resposta
+        else {
+            msgParagraph.innerText = "❌ CPF NÃO CADASTRADO";
             msgParagraph.className = "erro";
 
             if (window.navigator?.vibrate) window.navigator.vibrate([80, 40, 80]);
 
             setTimeout(() => {
-                msgParagraph.innerText = "INSIRA SEU CPF";
-                msgParagraph.className = "";
+                limparTudo();
             }, 2500);
         }
 
