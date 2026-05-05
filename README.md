@@ -2,6 +2,8 @@
 
 Sistema web moderno que simula um terminal de autenticação de academia, com entrada de CPF via teclado numérico interativo.
 
+Vercel: https://api-academia-front-m8xy3bw5z-joaquims-projects-be9a7ecb.vercel.app/
+
 📌 Sobre o Projeto
 
 O API Academia foi desenvolvido com foco em interface e experiência do usuário, simulando um sistema real de entrada em academias.
